@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 
 Args=Args()
-data = csv_to_pandas(Args.dataset_dir)
+data = csv_to_pandas(Args.csv_dataset_dir)
 tokenizer, model = bring_pretrain(Args.model_name)
 train_dataloader, valid_dataloader, test_dataloader = bring_dataset(data, tokenizer, Args)
 

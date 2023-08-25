@@ -5,6 +5,7 @@ import pickle
 import pandas as pd
 import torch
 from transformers import AutoTokenizer, AutoModel
+import numpy as np
 
 
 class Args:
@@ -28,7 +29,10 @@ class Args:
 
 
     model_name = "snunlp/KR-FinBert"
-    dataset_dir = ".\\data\\txt_files_f1\\txt_files_f1\\"
+    csv_dataset_dir = ".\\data\\txt_files_f1\\txt_files_f1\\"
+    pickle_dataset_dir = ".\\data\\txt_pkl_v3\\txt_pkl_v3\\"
+    save_new_dataset_dir = ".\\data\\pickle_180_days\\"
+    kospi_dataset_dir = '.\\data\\'
     learning_rate = 3e-5
     batch_size = 4
     sts_eval_dir = ".\\sts"
@@ -89,6 +93,22 @@ def csv_to_pandas(path):
     return data_df
 
 
+def excel_to_pandas(path, file_name):
+    """
+    엑셀 파일을 판다스로 바꾸는 코드입니다.
+   
+   input:
+        path(str) : 엑셀파일이 저장되어 있는 경로
+        file_name(str) : 파일 이름
+    
+    return:
+        data_df(DataFrame): 엑셀 파일을 데이터 프레임형태로 변환
+    """
+    data_df = pd.read_excel(path + file_name)
+
+    return data_df
+
+
 def bring_pretrain(model_name):
     """
     pretrain된 모델을 불러오기 위한 함수입니다.
@@ -105,8 +125,56 @@ def bring_pretrain(model_name):
     return tokenizer, model
 
 
+def make_day_return(data_dict):
+    """
+    레포트마다 누적수익률이 저장된 피클파일 데이터셋에서 컬럼을 180일까지 늘리는 함수입니다.
 
-     
+    input:
+        data_dict(Dict): 피클 파일 제목을 키값, 데이터는 DataFrame형태로 되어있는 딕셔너리 파일
+
+    output:
+        data_dict(Dict): 컬럼 길이를 180일까지 늘려둔 Dict 데이터
+    """
+
+    for pkl_file in data_dict.keys():
+        while data_dict[pkl_file].shape[1] <= 180:
+            data_dict[pkl_file].loc[:, data_dict[pkl_file].columns[-1] +1] = np.NaN
+    
+    return data_dict
 
 
+def _check_make_dir(dir):
+    """
+    새로운 데이터를 저장하기 위해 저장할 dir을 확인하는 코드입니다.
 
+    input:
+        dir(str) : 생성 및 확인하고자하는 폴더 경로
+    output:
+        해당되는 경로에 폴더 생성 
+    """
+    try:
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        print('complete make dir')
+    except OSError:
+        print('fail to make dir')
+
+
+def save_new_data_to_pickle(dir, data_dict):
+    """
+    새로운 데이터를 저장하기 위한 dir를 확인하고 데이터를 pickle파일로 저장하는 코드입니다.
+
+    input:
+        dir(str) : 파일을 저장하기 위한 경로
+        data_dict(dict) : 데이터가 저장되어 있는 dict
+
+    output:
+         pickle_file : 해당 경로에 pickle file로 저장됩니다.
+    """
+    
+    _check_make_dir(dir)
+
+    for file_name in data_dict.keys():
+        with open(dir + file_name, 'wb') as f:
+            pickle.dump(data_dict[file_name], f)
+            print(file_name +' save complete')
