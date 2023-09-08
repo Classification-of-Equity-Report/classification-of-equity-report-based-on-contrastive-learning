@@ -1,0 +1,31 @@
+data:
+  data_full_path: ./simCSE/pkl_files_after_220518/*pkl
+  split_day: 20211031
+  N: 20
+train:
+  batch_size: 8
+  device: cuda
+  epochs: 1
+  gpu_counts: 1
+  learning_rate: 0.0001
+  num_workers: 4 # gpus * 4 = num_workers
+  precision: 16
+  run_name: BinaryClassification
+  saving_path: /res
+  seed: 42
+  temperature: 0.05
+  valid_ratio: 0.2
+  warmup_steps: 300
+  num_labels: 2
+
+
+
+
+transformer:
+  Baseline: True #which is naive vanilla KR-FinBert
+  Sim_: False
+  UnSim_: False
+  from_pretrained: snunlp/KR-FinBert ## here should be the path of the pretrained model. Now, it's just a naive vanilla KR-FinBert
+  hidden_size: 768
+  max_length: 256
+
